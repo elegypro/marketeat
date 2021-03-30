@@ -39,7 +39,7 @@ public interface ItemService {
      * @param itemId
      * @return
      */
-    public ItemsParam queryItemParam(String itemId);
+    ItemsParam queryItemParam(String itemId);
 
 
     public CommentLevelCountsVO queryCommentCounts(String itemId);
@@ -50,7 +50,7 @@ public interface ItemService {
     //搜索商品列表
     public PagedGridResult searchItems(String keyword, String sort, Integer page, Integer pageSize);
 
-
-
+    //根据分类id搜索商品列表
+    public PagedGridResult searchItems(Integer catId, String sort, Integer page, Integer pageSize);
 
 }
