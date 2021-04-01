@@ -6,6 +6,7 @@ import com.imooc.pojo.ItemsParam;
 import com.imooc.pojo.ItemsSpec;
 import com.imooc.pojo.vo.CommentLevelCountsVO;
 import com.imooc.pojo.vo.ItemCommentVO;
+import com.imooc.pojo.vo.ShopcartVO;
 import com.imooc.utils.PagedGridResult;
 import io.swagger.models.auth.In;
 
@@ -52,5 +53,7 @@ public interface ItemService {
 
     //根据分类id搜索商品列表
     public PagedGridResult searchItems(Integer catId, String sort, Integer page, Integer pageSize);
+
+    public List<ShopcartVO> queryItemsBySpecIds(String specIds);
 
 }
