@@ -3,6 +3,7 @@ package com.imooc.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.imooc.enums.CommentLevel;
+import com.imooc.enums.YesOrNo;
 import com.imooc.mapper.*;
 import com.imooc.pojo.*;
 import com.imooc.pojo.vo.CommentLevelCountsVO;
@@ -12,7 +13,6 @@ import com.imooc.pojo.vo.ShopcartVO;
 import com.imooc.service.ItemService;
 import com.imooc.utils.DesensitizationUtil;
 import com.imooc.utils.PagedGridResult;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -161,6 +161,47 @@ public class ItemServiceImpl implements ItemService {
         Collections.addAll(specIdsList ,ids);
 
         return itemsMapperCustom.queryItemsBySpecIds(specIdsList);
+
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public ItemsSpec queryItemSpecById(String specId) {
+        return itemsSpecMapper.selectByPrimaryKey(specId);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public String querItemMainImgById(String itemId) {
+        ItemsImg itemsImg = new ItemsImg();
+        itemsImg.setItemId(itemId);
+        itemsImg.setIsMain(YesOrNo.YES.type);
+        ItemsImg result = itemsImgMapper.selectOne(itemsImg);
+        return result != null ? result.getUrl() : "";
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public  void decreaseItemSpecStock(String specId, int buyCounts) {
+
+        // synchronized 不推荐使用，集群下无用，性能低下
+        // 锁数据库：不推荐，导致数据库性能低下
+        // 分布式锁 zookeeper redis
+
+        //lockUtil.getLock(); --加锁
+        //1.查询库存
+        //int stock = 2;
+
+        //2.判断库存，是否能够减少到0以下
+//        if (stock-buyCounts<0){
+//            //提示用户库存不够
+//        }
+
+        //lockUtil.unLock(); -- 执行完毕后解锁
+
+       int result = itemsMapperCustom.decreaseItemSpecStock(specId,buyCounts);
+
 
     }
 

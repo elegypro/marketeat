@@ -54,6 +54,16 @@ public interface ItemService {
     //根据分类id搜索商品列表
     public PagedGridResult searchItems(Integer catId, String sort, Integer page, Integer pageSize);
 
+    //根据规格ids查询最新的购物车中的商品数据（用于刷新渲染购物车中的商品数据）
     public List<ShopcartVO> queryItemsBySpecIds(String specIds);
+
+    //根据商品规格id获取规格对象的具体
+    public ItemsSpec queryItemSpecById(String specId);
+
+    //根据商品id获取商品图片
+    public String querItemMainImgById(String itemId);
+
+    //减少规格里面的库存,传入规格id和购买的数量
+    public void decreaseItemSpecStock(String specId, int buyCounts);
 
 }
