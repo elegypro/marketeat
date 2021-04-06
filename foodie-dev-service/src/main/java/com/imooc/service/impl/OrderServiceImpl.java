@@ -50,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
     private UserAddressMapper userAddressMapper;
 
     @Override
-    public void createOrder(SubmitOrderBO submitOrderBO) {
+    public String createOrder(SubmitOrderBO submitOrderBO) {
         String userId = submitOrderBO.getUserId();
         String addressId = submitOrderBO.getAddressId();
         String itemSpecIds = submitOrderBO.getItemSpecIds();
@@ -66,8 +66,10 @@ public class OrderServiceImpl implements OrderService {
         Orders newOrder = new Orders();
         newOrder.setId(orderId);
         newOrder.setUserId(userId);
+
+        newOrder.setReceiverMobile(address.getMobile());
         newOrder.setReceiverName(address.getReceiver());
-        newOrder.setReceiverMobile(address.getProvince() + " "
+        newOrder.setReceiverAddress(address.getProvince() + " "
                 + address.getCity() + " "
                 + address.getDistrict() + " "
                 + address.getDetail());
@@ -107,13 +109,20 @@ public class OrderServiceImpl implements OrderService {
             OrderItems subOrderItem = new OrderItems();
             subOrderItem.setId(subOrderId);
             subOrderItem.setOrderId(orderId);
-            subOrderItem.setOrderId(itemId);
+            subOrderItem.setItemId(itemId);
             subOrderItem.setItemName(items.getItemName());
+            subOrderItem.setItemImg(imgUrl);
             subOrderItem.setBuyCounts(buyCounts);
+            subOrderItem.setItemSpecId(itemSpecId);
             subOrderItem.setItemSpecName(itemsSpec.getName());
             subOrderItem.setPrice(itemsSpec.getPriceDiscount());
             orderItemsMapper.insert(subOrderItem);
+
+            //2.4 在用户提交订单以后，规格表中需要扣除库存
+            itemService.decreaseItemSpecStock(itemSpecId,buyCounts);
         }
+
+
 
         //商品的价格
             newOrder.setTotalAmount(totalAmout);
@@ -129,6 +138,17 @@ public class OrderServiceImpl implements OrderService {
         waitPayOrderSatus.setCreatedTime(new Date());
         orderStatusMapper.insert(waitPayOrderSatus);
 
-        //2.4 在用户提交订单以后，规格表中需要扣除库存
+        return orderId;
+    }
+
+    @Override
+    public void updateOrderStatus(String orderId, Integer orderSatus) {
+        OrderStatus paidStatus = new OrderStatus();
+        paidStatus.setOrderId(orderId);
+        paidStatus.setOrderStatus(orderSatus);
+        paidStatus.setPayTime(new Date());
+
+        orderStatusMapper.updateByPrimaryKeySelective(paidStatus);
+
     }
 }
