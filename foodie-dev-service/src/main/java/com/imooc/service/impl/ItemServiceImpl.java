@@ -201,6 +201,9 @@ public class ItemServiceImpl implements ItemService {
         //lockUtil.unLock(); -- 执行完毕后解锁
 
        int result = itemsMapperCustom.decreaseItemSpecStock(specId,buyCounts);
+       if(result !=1){
+           throw new RuntimeException("订单创建失败，原因：库存不足");
+       }
 
 
     }
