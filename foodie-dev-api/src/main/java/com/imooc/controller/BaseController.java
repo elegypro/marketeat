@@ -15,8 +15,10 @@ public class BaseController {
     public static final Integer COMMON_PAGE_SIZE = 10;
     public static final Integer PAGE_SIZE = 20;
 
+    //支付中心的调用地址
+    String paymentUrl = "http://payment.t.mukewang.com/foodie-payment/payment/createMerchantOrder";
     // 微信支付成功 ->支付中心 -> 平台
     //                       -> 回调通知的url
-    String payReturnUrl ="http://localhost:8081/orders/notifyMerchanOrderPaid";
+    String payReturnUrl ="http://w2g927.natappfree.cc/orders/notifyMerchanOrderPaid";
 
 }
