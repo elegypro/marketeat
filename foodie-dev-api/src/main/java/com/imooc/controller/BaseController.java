@@ -19,6 +19,17 @@ public class BaseController {
     String paymentUrl = "http://payment.t.mukewang.com/foodie-payment/payment/createMerchantOrder";
     // 微信支付成功 ->支付中心 -> 平台
     //                       -> 回调通知的url
-    String payReturnUrl ="http://w2g927.natappfree.cc/orders/notifyMerchanOrderPaid";
+    String payReturnUrl = "http://w2g927.natappfree.cc/orders/notifyMerchanOrderPaid";
 
+    //用户上传头像的位置
+    //public static final String IMAGE_USER_FACE_LOCATION = "/Users/zhangxuanzhi/Desktop/apache-tomcat-9.0.44/webapps/images/foodie/faces";
+    //File.separator 可以根据不同的操作系统来切换不同的斜杠/
+    public static final String IMAGE_USER_FACE_LOCATION = File.separator + "Users" +
+            File.separator + "zhangxuanzhi" +
+            File.separator + "Desktop" +
+            File.separator + "apache-tomcat-9.0.44" +
+            File.separator + "webapps" +
+            File.separator + "images" +
+            File.separator + "foodie" +
+            File.separator + "faces";
 }

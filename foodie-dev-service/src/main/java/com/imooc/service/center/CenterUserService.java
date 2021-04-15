@@ -12,4 +12,7 @@ public interface CenterUserService {
 
     //修改用户信息
     public Users updateUserInfo(String userId, CenterUserBO centerUserBO);
+
+    //用户头像更新
+    public Users updateUserFace(String userId, String faceUrl);
 }

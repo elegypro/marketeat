@@ -31,10 +31,10 @@ public class CenterUserServiceImpl implements CenterUserService {
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public Users queryUserInfo(String userId) {
-        Users users = usersMapper.selectByPrimaryKey(userId);
+        Users user = usersMapper.selectByPrimaryKey(userId);
         //密码我们不要带过去
-        users.setPassword(null);
-        return users;
+        user.setPassword(null);
+        return user;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -44,6 +44,19 @@ public class CenterUserServiceImpl implements CenterUserService {
         Users updateUser = new Users();
         BeanUtils.copyProperties(centerUserBO,updateUser);
         updateUser.setId(userId);
+        updateUser.setUpdatedTime(new Date());
+
+        usersMapper.updateByPrimaryKeySelective(updateUser);
+
+        return queryUserInfo(userId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public Users updateUserFace(String userId, String faceUrl) {
+        Users updateUser = new Users();
+        updateUser.setId(userId);
+        updateUser.setFace(faceUrl);
         updateUser.setUpdatedTime(new Date());
 
         usersMapper.updateByPrimaryKeySelective(updateUser);
