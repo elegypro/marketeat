@@ -13,7 +13,7 @@ public class Orderjob {
     private OrderService orderService;
 
     //@Scheduled(cron = "0/3 * * * * ?")
-    //每隔一个小事来一次
+    //每隔一个小时来一次
     @Scheduled(cron = "0 0 0/1 * * * * ?")
     public void autoCloseOrder(){
         orderService.closeOrder();
