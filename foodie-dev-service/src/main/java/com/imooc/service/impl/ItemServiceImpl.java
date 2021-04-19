@@ -107,8 +107,11 @@ public class ItemServiceImpl implements ItemService {
         map.put("itemId",itemId);
         map.put("level",level);
 
+        //查询的用户的评论
        List<ItemCommentVO> list =  itemsMapperCustom.queryItemComments(map);
-
+       for(ItemCommentVO vo: list){
+           vo.setNickname(DesensitizationUtil.commonDisplay(vo.getNickname()));
+       }
        for(ItemCommentVO vo :list){
            vo.setNickname(DesensitizationUtil.commonDisplay(vo.getNickname()));
        }
