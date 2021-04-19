@@ -24,9 +24,8 @@ public class PassportController {
     @Autowired
     private UserService userService;
 
-    //添加swagger日志的内容解释
     @ApiOperation(value = "用户名是否存在", notes = "用户名是否存在", httpMethod = "GET")
-    @GetMapping("usernameIsExist")
+    @GetMapping("/usernameIsExist")
     public IMOOCJSONResult usernameIsExist(@RequestParam String username) {
 
         // 1. 判断用户名不能为空
@@ -44,12 +43,12 @@ public class PassportController {
         return IMOOCJSONResult.ok();
     }
 
-
     @ApiOperation(value = "用户注册", notes = "用户注册", httpMethod = "POST")
     @PostMapping("/regist")
     public IMOOCJSONResult regist(@RequestBody UserBO userBO,
                                   HttpServletRequest request,
                                   HttpServletResponse response) {
+
         String username = userBO.getUsername();
         String password = userBO.getPassword();
         String confirmPwd = userBO.getConfirmPassword();
@@ -84,16 +83,19 @@ public class PassportController {
 
         CookieUtils.setCookie(request, response, "user",
                 JsonUtils.objectToJson(userResult), true);
-        return IMOOCJSONResult.ok();
 
+        // TODO 生成用户token，存入redis会话
+        // TODO 同步购物车数据
+
+        return IMOOCJSONResult.ok();
     }
 
     @ApiOperation(value = "用户登录", notes = "用户登录", httpMethod = "POST")
     @PostMapping("/login")
-
     public IMOOCJSONResult login(@RequestBody UserBO userBO,
                                  HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
+
         String username = userBO.getUsername();
         String password = userBO.getPassword();
 
@@ -103,29 +105,24 @@ public class PassportController {
             return IMOOCJSONResult.errorMsg("用户名或密码不能为空");
         }
 
-
-        // 2. 密码长度不能少于6位
-        if (password.length() < 6) {
-            return IMOOCJSONResult.errorMsg("密码长度不能少于6");
-        }
-
-        // 4. 实现登录
-
-        Users userResult = userService.queryUserForLogin(username, MD5Utils.getMD5Str(password));
+        // 1. 实现登录
+        Users userResult = userService.queryUserForLogin(username,
+                MD5Utils.getMD5Str(password));
 
         if (userResult == null) {
-            return IMOOCJSONResult.errorMsg("用户名密码不正确");
-
+            return IMOOCJSONResult.errorMsg("用户名或密码不正确");
         }
+
         userResult = setNullProperty(userResult);
 
         CookieUtils.setCookie(request, response, "user",
                 JsonUtils.objectToJson(userResult), true);
 
+
         // TODO 生成用户token，存入redis会话
         // TODO 同步购物车数据
-        return IMOOCJSONResult.ok(userResult);
 
+        return IMOOCJSONResult.ok(userResult);
     }
 
     private Users setNullProperty(Users userResult) {
@@ -138,12 +135,13 @@ public class PassportController {
         return userResult;
     }
 
-    @ApiOperation(value = "用户退出登录", notes = "用户退出登录", httpMethod = "POST")
-    @PostMapping("/loginout")
 
-    public IMOOCJSONResult login(@RequestBody String userId,
-                                 HttpServletRequest request,
-                                 HttpServletResponse response) {
+    @ApiOperation(value = "用户退出登录", notes = "用户退出登录", httpMethod = "POST")
+    @PostMapping("/logout")
+    public IMOOCJSONResult logout(@RequestParam String userId,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response) {
+
         // 清除用户的相关信息的cookie
         CookieUtils.deleteCookie(request, response, "user");
 
@@ -152,6 +150,5 @@ public class PassportController {
 
         return IMOOCJSONResult.ok();
     }
-
 
 }
