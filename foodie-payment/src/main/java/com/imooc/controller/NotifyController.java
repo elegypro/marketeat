@@ -119,6 +119,7 @@ public class NotifyController {
 	@RequestMapping(value="/alipay")
 	public String alipay(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
+		System.out.println("进来了");
 		log.info("支付成功后的支付宝异步通知");
 
 		//获取支付宝POST过来反馈信息
