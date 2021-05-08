@@ -4,7 +4,7 @@ import com.imooc.controller.BaseController;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.center.CenterUserBO;
 import com.imooc.resource.FileUpload;
-
+import com.imooc.service.UserService;
 import com.imooc.service.center.CenterUserService;
 import com.imooc.utils.CookieUtils;
 import com.imooc.utils.DateUtil;
@@ -49,13 +49,13 @@ public class CenterUserController extends BaseController {
             @ApiParam(name = "userId", value = "用户id", required = true)
             @RequestParam String userId,
             @ApiParam(name = "file", value = "用户头像", required = true)
-                    MultipartFile file,
+            MultipartFile file,
             HttpServletRequest request, HttpServletResponse response) {
 
         // .sh .php
 
         // 定义头像保存的地址
-        //String fileSpace = IMAGE_USER_FACE_LOCATION;
+//        String fileSpace = IMAGE_USER_FACE_LOCATION;
         String fileSpace = fileUpload.getImageUserFaceLocation();
         // 在路径上为每一个用户增加一个userid，用于区分不同用户上传
         String uploadPathPrefix = File.separator + userId;
@@ -77,7 +77,7 @@ public class CenterUserController extends BaseController {
 
                     if (!suffix.equalsIgnoreCase("png") &&
                             !suffix.equalsIgnoreCase("jpg") &&
-                            !suffix.equalsIgnoreCase("jpeg")) {
+                            !suffix.equalsIgnoreCase("jpeg") ) {
                         return IMOOCJSONResult.errorMsg("图片格式不正确！");
                     }
 
@@ -87,12 +87,11 @@ public class CenterUserController extends BaseController {
 
                     // 上传的头像最终保存的位置
                     String finalFacePath = fileSpace + uploadPathPrefix + File.separator + newFileName;
-                    //用于提供给web服务访问的地址
-                    uploadPathPrefix +=("/"+newFileName);
+                    // 用于提供给web服务访问的地址
+                    uploadPathPrefix += ("/" + newFileName);
 
-                    //文件要保存的具体的路径
                     File outFile = new File(finalFacePath);
-                    if (outFile.getParentFile() == null) {
+                    if (outFile.getParentFile() != null) {
                         // 创建文件夹
                         outFile.getParentFile().mkdirs();
                     }
@@ -119,19 +118,15 @@ public class CenterUserController extends BaseController {
             return IMOOCJSONResult.errorMsg("文件不能为空！");
         }
 
-
-        //获取图片服务器地址
+        // 获取图片服务地址
         String imageServerUrl = fileUpload.getImageServerUrl();
 
-        //由于浏览器可能存在缓存的情况，所以在这里，我们需要加上时间戳来保证更新后的图片可以及时刷新
-        String finaUserFaceUrl = imageServerUrl + uploadPathPrefix
-                +"?t"+ DateUtil.getCurrentDateString(DateUtil.DATE_PATTERN);
-        //获得当前的时间
-        //真实地址
-        String finalUserFaceUrl = imageServerUrl + uploadPathPrefix;
+        // 由于浏览器可能存在缓存的情况，所以在这里，我们需要加上时间戳来保证更新后的图片可以及时刷新
+        String finalUserFaceUrl = imageServerUrl + uploadPathPrefix
+                + "?t=" + DateUtil.getCurrentDateString(DateUtil.DATE_PATTERN);
 
-        //更新用户头像到数据库
-        Users userResult = centerUserService.updateUserFace(userId,finalUserFaceUrl);
+        // 更新用户头像到数据库
+        Users userResult = centerUserService.updateUserFace(userId, finalUserFaceUrl);
 
         userResult = setNullProperty(userResult);
         CookieUtils.setCookie(request, response, "user",
@@ -141,6 +136,7 @@ public class CenterUserController extends BaseController {
 
         return IMOOCJSONResult.ok();
     }
+
 
 
     @ApiOperation(value = "修改用户信息", notes = "修改用户信息", httpMethod = "POST")
@@ -162,7 +158,6 @@ public class CenterUserController extends BaseController {
 
         Users userResult = centerUserService.updateUserInfo(userId, centerUserBO);
 
-        //要与前端内容保持一致
         userResult = setNullProperty(userResult);
         CookieUtils.setCookie(request, response, "user",
                 JsonUtils.objectToJson(userResult), true);

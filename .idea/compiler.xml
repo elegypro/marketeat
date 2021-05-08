@@ -17,6 +17,7 @@
       <module name="foodie-dev" target="1.8" />
       <module name="foodie-dev-api" target="1.8" />
       <module name="foodie-dev-common" target="1.8" />
+      <module name="foodie-dev-common (1)" target="1.8" />
       <module name="foodie-dev-mapper" target="1.8" />
       <module name="foodie-dev-pojo" target="8" />
       <module name="foodie-dev-service" target="8" />
@@ -26,6 +27,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="foodie-dev-api" options="-parameters" />
       <module name="foodie-dev-common" options="-parameters" />
+      <module name="foodie-dev-common (1)" options="-parameters" />
       <module name="foodie-dev-mapper" options="-parameters" />
       <module name="foodie-dev-pojo" options="-parameters" />
       <module name="foodie-dev-service" options="-parameters" />
