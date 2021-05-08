@@ -20,17 +20,15 @@ public class CenterController {
     @Autowired
     private CenterUserService centerUserService;
 
-    @ApiOperation(value = "获取用户信息", notes ="获取用户信息",httpMethod = "GET")
+    @ApiOperation(value = "获取用户信息", notes = "获取用户信息", httpMethod = "GET")
     @GetMapping("userInfo")
     public IMOOCJSONResult userInfo(
-        //required 比填项
-        @ApiParam(name = "userId",value = "用户id",required = true)
-        @RequestParam String userId){
+            @ApiParam(name = "userId", value = "用户id", required = true)
+            @RequestParam String userId) {
 
         Users user = centerUserService.queryUserInfo(userId);
         return IMOOCJSONResult.ok(user);
-
-        }
-
     }
 
+
+}
