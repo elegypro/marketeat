@@ -8,9 +8,12 @@ import com.imooc.pojo.vo.NewItemsVO;
 import com.imooc.service.CarouselService;
 import com.imooc.service.CategoryService;
 import com.imooc.utils.IMOOCJSONResult;
+import com.imooc.utils.JsonUtils;
+import com.imooc.utils.RedisOperator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 
 @Api(value = "首页", tags = {"首页展示的相关接口"})
@@ -31,11 +35,31 @@ public class IndexController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private RedisOperator redisOperator;
+
+    /**
+     * 1。后台运营系统，一旦广告（轮播图）发送更改，就可以删除缓存，然后重制
+     * 2。定时重置，比如每天凌晨三点重置
+     * 3。每个轮播图都有可能是一个广告，每个广告都会有一个过期时间，过期了，再重置
+     * @return
+     */
     @ApiOperation(value = "获取首页轮播图列表", notes = "获取首页轮播图列表", httpMethod = "GET")
     @GetMapping("/carousel")
     public IMOOCJSONResult carousel() {
-        List<Carousel> list = carouselService.queryAll(YesOrNo.YES.type);
+        List<Carousel> list = new ArrayList<>();
+        //这个轮播图先在我们的redis里面查询一下，是否存在redis当中，存在就直接取，返回给前端
+        String carouselStr = redisOperator.get("carousel");
+        if (StringUtils.isBlank(carouselStr)){
+            list = carouselService.queryAll(YesOrNo.YES.type);
+            redisOperator.set("carousel", JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(carouselStr,Carousel.class);
+        }
+
         return IMOOCJSONResult.ok(list);
+
+
     }
 
     /**
@@ -46,9 +70,18 @@ public class IndexController {
     @ApiOperation(value = "获取商品分类(一级分类)", notes = "获取商品分类(一级分类)", httpMethod = "GET")
     @GetMapping("/cats")
     public IMOOCJSONResult cats() {
-        List<Category> list = categoryService.queryAllRootLevelCat();
+        List<Category> list = new ArrayList<>();
+        String catsStr = redisOperator.get("cats");
+        if (StringUtils.isBlank(catsStr)){
+            list = categoryService.queryAllRootLevelCat();
+            redisOperator.set("cats",JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(catsStr,Category.class);
+        }
+
         return IMOOCJSONResult.ok(list);
     }
+
 
     @ApiOperation(value = "获取商品子分类", notes = "获取商品子分类", httpMethod = "GET")
     @GetMapping("/subCat/{rootCatId}")
@@ -59,10 +92,20 @@ public class IndexController {
         if (rootCatId == null) {
             return IMOOCJSONResult.errorMsg("分类不存在");
         }
+        List<CategoryVO> list = new ArrayList<>();
+        String catsStr = redisOperator.get("subCat"+rootCatId);
+        if(StringUtils.isBlank(catsStr)){
+            list = categoryService.getSubCatList(rootCatId);
+            redisOperator.set("subCat"+rootCatId,JsonUtils.objectToJson(list));
+        }else {
+            list = JsonUtils.jsonToList(catsStr,CategoryVO.class);
+        }
 
-        List<CategoryVO> list = categoryService.getSubCatList(rootCatId);
+
         return IMOOCJSONResult.ok(list);
     }
+
+
 
     @ApiOperation(value = "查询每个一级分类下的最新6条商品数据", notes = "查询每个一级分类下的最新6条商品数据", httpMethod = "GET")
     @GetMapping("/sixNewItems/{rootCatId}")
