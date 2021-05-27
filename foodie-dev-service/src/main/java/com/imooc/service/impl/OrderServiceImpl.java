@@ -95,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
         Integer realPayAmount = 0; //优惠后的实际价格
         for (String itemSpecId : itemSpecIdArr) {
 
-            //TODO 整合redis后，商品购买的数量重新从redis的购物车中获得
+            // 整合redis后，商品购买的数量重新从redis的购物车中获得
             int buyCounts = 1;
 
             //2.1 根据规格id，查询规格的具体信息
