@@ -8,6 +8,7 @@ import com.imooc.mapper.OrdersMapper;
 import com.imooc.mapper.UserAddressMapper;
 import com.imooc.pojo.*;
 import com.imooc.pojo.bo.AddressBO;
+import com.imooc.pojo.bo.ShopcartBO;
 import com.imooc.pojo.bo.SubmitOrderBO;
 import com.imooc.pojo.vo.MerchantOrdersVO;
 import com.imooc.pojo.vo.OrderVO;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -54,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public OrderVO createOrder(SubmitOrderBO submitOrderBO) {
+    public OrderVO createOrder(List<ShopcartBO>shopcartList,SubmitOrderBO submitOrderBO) {
         String userId = submitOrderBO.getUserId();
         String addressId = submitOrderBO.getAddressId();
         String itemSpecIds = submitOrderBO.getItemSpecIds();
@@ -93,10 +95,15 @@ public class OrderServiceImpl implements OrderService {
         String itemSpecIdArr[] = itemSpecIds.split(",");
         Integer totalAmout = 0; //商品原始的价格
         Integer realPayAmount = 0; //优惠后的实际价格
+        List<ShopcartBO> toBeRemovedShopcatdList = new ArrayList<>();
+        //这一块其实是在创建我们的订单，创建订单的时候就和我们的cartitem是关联到一起的
         for (String itemSpecId : itemSpecIdArr) {
-
+            //这个时候我就能创建订单的时候，把每一项cartItem放到待移除的列表里面去
+            //等我们这个列表有了数据以后，当前的server执行完毕以后，我们再去做一个清除缓存的操作
+           ShopcartBO cartItem = getBuyCountsFromShopcart(shopcartList,itemSpecId);
             // 整合redis后，商品购买的数量重新从redis的购物车中获得
-            int buyCounts = 1;
+            int buyCounts = cartItem.getBuyCounts();
+            toBeRemovedShopcatdList.add(cartItem);
 
             //2.1 根据规格id，查询规格的具体信息
             ItemsSpec itemsSpec = itemService.queryItemSpecById(itemSpecId);
@@ -151,10 +158,27 @@ public class OrderServiceImpl implements OrderService {
         OrderVO orderVO = new OrderVO();
         orderVO.setOrderId(orderId);
         orderVO.setMerchantOrdersVO(merchantOrdersVO);
-
+        orderVO.setToBeRemovedShopcatdList(toBeRemovedShopcatdList);
         return orderVO;
+
     }
 
+    /**
+     * 从redis的购物车中获取商品，目的：counts
+     * 在这边进行判断，如果说这个cart里面的规格id，和我们传进来的规格ID如果是一样的，我们就直接可以
+     * 把我的cart直接丢进去就可以了
+     * @param shopcartList
+     * @param specId
+     * @return
+     */
+    private ShopcartBO getBuyCountsFromShopcart(List<ShopcartBO> shopcartList,String specId){
+        for (ShopcartBO cart : shopcartList){
+            if (cart.getSpecId().equals(specId)){
+                return cart;
+            }
+        }
+        return null;
+    }
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void updateOrderStatus(String orderId, Integer orderSatus) {

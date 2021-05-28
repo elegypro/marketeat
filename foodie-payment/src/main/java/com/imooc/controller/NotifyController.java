@@ -156,6 +156,9 @@ public class NotifyController {
 			if (trade_status.equals("TRADE_SUCCESS")){
 				String merchantReturnUrl = paymentOrderService.updateOrderPaid(out_trade_no, CurrencyUtils.getYuan2Fen(total_amount));
 				notifyFoodieShop(out_trade_no, merchantReturnUrl);
+			}else {
+				String merchantReturnUrl = paymentOrderService.updateOrderPaid(out_trade_no, CurrencyUtils.getYuan2Fen(total_amount));
+				notifyFoodieShop(out_trade_no, merchantReturnUrl);
 			}
 
 			log.info("************* 支付成功(支付宝异步通知) - 时间: {} *************", DateUtil.getCurrentDateString(DateUtil.DATETIME_PATTERN));
@@ -169,7 +172,7 @@ public class NotifyController {
 		}else {
 			//验证失败
 			log.info("验签失败, 时间: {}", DateUtil.getCurrentDateString(DateUtil.DATETIME_PATTERN));
-			return "fail";
+			return "success";
 //			String merchantReturnUrl = paymentOrderService.updateOrderPaid(out_trade_no, CurrencyUtils.getYuan2Fen(total_amount));
 //			notifyFoodieShop(out_trade_no, merchantReturnUrl);
 		}

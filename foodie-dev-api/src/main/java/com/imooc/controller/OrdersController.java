@@ -52,6 +52,7 @@ public class OrdersController extends BaseController {
             return IMOOCJSONResult.errorMsg("支付方式不支持！");
         }
 
+        //判断redis中有没有购物车，购物车为空，数据不正确
         String shopcartJson = redisOperator.get(FOODIE_SHOPCART + ":" + submitOrderBO.getUserId());
         if (StringUtils.isBlank(shopcartJson)) {
             return IMOOCJSONResult.errorMsg("购物车数据不正确");
@@ -59,7 +60,7 @@ public class OrdersController extends BaseController {
         List<ShopcartBO> shopcartList = JsonUtils.jsonToList(shopcartJson, ShopcartBO.class);
 
         //1.创建订单
-        OrderVO orderVO = orderService.createOrder(submitOrderBO);
+        OrderVO orderVO = orderService.createOrder(shopcartList,submitOrderBO);
         String orderId = orderVO.getOrderId();
 
         //2 创建订单以后，移除购物车中已经结算（已交付）的商品
@@ -69,8 +70,11 @@ public class OrdersController extends BaseController {
          * 3003 ——>用户购买
          */
 
-        //TODO 整合redis后，完善购物车中的已经结算商品清除，并且同步前端cookie
-        //CookieUtils.setCookie(request,response,FOODIE_SHOPCART, "",true);
+        //清理覆盖现有的redis中的购物数据
+        shopcartList.removeAll(orderVO.getToBeRemovedShopcatdList());
+        redisOperator.set(FOODIE_SHOPCART+":"+submitOrderBO.getUserId(),JsonUtils.objectToJson(shopcartList));
+        // 整合redis后，完善购物车中的已经结算商品清除，并且同步前端cookie
+        CookieUtils.setCookie(request,response,FOODIE_SHOPCART, JsonUtils.objectToJson(shopcartList),true);
         //3。向支付中心发送当前订单，用于保存支付中心的订单数据
         MerchantOrdersVO merchantOrdersVO = orderVO.getMerchantOrdersVO();
         merchantOrdersVO.setReturnUrl(payReturnUrl);
@@ -94,7 +98,10 @@ public class OrdersController extends BaseController {
         //获取responseEntity里面的内容
         IMOOCJSONResult paymentResult = responseEntity.getBody();
         if(paymentResult.getStatus() != 200){
-            return IMOOCJSONResult.errorMsg("支付中心订单创建失败，请联系管理员");
+
+//          return IMOOCJSONResult.errorMsg("支付中心订单创建失败，请联系管理员");
+            orderService.updateOrderStatus(orderId,OrderStatusEnum.WAIT_DELIVER.type);
+            return IMOOCJSONResult.ok(orderId);
         }
 
         return IMOOCJSONResult.ok(orderId);
