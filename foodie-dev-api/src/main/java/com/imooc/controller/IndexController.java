@@ -96,7 +96,14 @@ public class IndexController {
         String catsStr = redisOperator.get("subCat"+rootCatId);
         if(StringUtils.isBlank(catsStr)){
             list = categoryService.getSubCatList(rootCatId);
-            redisOperator.set("subCat"+rootCatId,JsonUtils.objectToJson(list));
+            if (list != null && list.size()>0){
+                redisOperator.set("subCat"+rootCatId,JsonUtils.objectToJson(list));
+            }else {
+                //直接会设置一个数据,不管我们的list是否为空,我们都把它放入到我们的缓存里面去,可以为它设置一个过期时间300秒
+                redisOperator.set("subCat"+rootCatId,JsonUtils.objectToJson(list),5*60);
+            }
+
+
         }else {
             list = JsonUtils.jsonToList(catsStr,CategoryVO.class);
         }

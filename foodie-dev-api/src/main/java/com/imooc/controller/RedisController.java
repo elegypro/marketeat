@@ -2,12 +2,16 @@ package com.imooc.controller;
 
 import com.imooc.utils.RedisOperator;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.License;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ApiIgnore //绝对不会在swagger日志中显示
 @RestController
@@ -40,5 +44,16 @@ public class RedisController {
 //        redisTemplate.delete(key);
         redisOperator.del(key);
         return "OK";
+    }
+
+    @GetMapping("/getAlot")
+    public Object getAlot(String... keys){
+
+        List<String> result = new ArrayList<>();
+        for (String k:keys){
+            result.add(redisOperator.get(k));
+
+        }
+        return result;
     }
 }

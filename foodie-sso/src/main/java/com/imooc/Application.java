@@ -13,9 +13,6 @@ import tk.mybatis.spring.annotation.MapperScan;
 @MapperScan(basePackages = "com.imooc.mapper")
 // 扫描所有包以及相关组件包
 @ComponentScan(basePackages = {"com.imooc", "org.n3r.idworker"})
-//@EnableTransactionManagement
-@EnableScheduling       // 开启定时任务
-@EnableRedisHttpSession  //开启redis的session
 public class Application {
 
     public static void main(String[] args) {
