@@ -106,6 +106,12 @@
     <orderEntry type="library" name="Maven: org.springframework.plugin:spring-plugin-metadata:1.2.0.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: io.springfox:springfox-swagger-ui:2.4.0" level="project" />
     <orderEntry type="library" name="Maven: com.github.xiaoymin:swagger-bootstrap-ui:1.6" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.session:spring-session-data-redis:2.1.1.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.session:spring-session-core:2.1.1.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-security:2.1.0.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-config:5.1.1.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-core:5.1.1.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-web:5.1.1.RELEASE" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:javax.servlet-api:3.0.1" level="project" />
   </component>
 </module>

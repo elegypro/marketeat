@@ -3,11 +3,13 @@ package com.imooc.controller;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.ShopcartBO;
 import com.imooc.pojo.bo.UserBO;
+import com.imooc.pojo.vo.UsersVO;
 import com.imooc.service.UserService;
 import com.imooc.utils.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Api(value = "注册登录", tags = {"用于注册登录的相关接口"})
 @RestController
@@ -81,14 +84,17 @@ public class PassportController extends BaseController{
 
         // 4. 实现注册
         Users userResult = userService.createUser(userBO);
-
         userResult = setNullProperty(userResult);
+
+        //实现用户的redis会话
+        UsersVO usersVO = conventUsersVO(userResult);
+
 
         CookieUtils.setCookie(request, response, "user",
                 JsonUtils.objectToJson(userResult), true);
 
-        // TODO 生成用户token，存入redis会话
-        // TODO 同步购物车数据
+        //同步购物车数据
+        synchShopcartData(userResult.getId(),request,response);
 
         return IMOOCJSONResult.ok();
     }
@@ -116,7 +122,11 @@ public class PassportController extends BaseController{
             return IMOOCJSONResult.errorMsg("用户名或密码不正确");
         }
 
-        userResult = setNullProperty(userResult);
+        //是为了把一些不必要的内容忽略掉
+       // userResult = setNullProperty(userResult);
+
+        //实现用户的redis会话
+        UsersVO usersVO = conventUsersVO(userResult);
 
         CookieUtils.setCookie(request, response, "user",
                 JsonUtils.objectToJson(userResult), true);
@@ -128,6 +138,8 @@ public class PassportController extends BaseController{
         synchShopcartData(userResult.getId(),request,response);
         return IMOOCJSONResult.ok(userResult);
     }
+
+
 
     /**
      * 注册登陆成功后，同步cookie和redis中的数据
@@ -223,8 +235,11 @@ public class PassportController extends BaseController{
         // 清除用户的相关信息的cookie
         CookieUtils.deleteCookie(request, response, "user");
 
-        // TODO 用户退出登录，需要清空购物车
-        // TODO 分布式会话中需要清除用户数据
+        // 用户退出登录，需要清空redis中的会话信息
+        //可以去get一下，能不能根据用户的id去拿到token，并且和前端用户的token是匹配的，当前的操作就是当前用户的发起人的请求
+        redisOperator.del(REDIS_USER_TOKEN+ ":"+userId);
+        // 分布式会话中需要清除用户数据
+        CookieUtils.deleteCookie(request,response,FOODIE_SHOPCART);
 
         return IMOOCJSONResult.ok();
     }
