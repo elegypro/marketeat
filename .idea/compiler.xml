@@ -20,7 +20,7 @@
       <module name="foodie-dev-api" target="1.8" />
       <module name="foodie-dev-common" target="1.8" />
       <module name="foodie-dev-common (1)" target="1.8" />
-      <module name="foodie-dev-fs" target="8" />
+      <module name="foodie-dev-fs" target="1.8" />
       <module name="foodie-dev-mapper" target="1.8" />
       <module name="foodie-dev-pojo" target="8" />
       <module name="foodie-dev-search" target="8" />
